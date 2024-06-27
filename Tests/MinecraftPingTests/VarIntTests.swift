@@ -6,30 +6,27 @@
 //
 
 import XCTest
+@testable import MinecraftPing
 
 final class VarIntTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    func testIntToVarInt() throws {
+//        Test cases from https://wiki.vg/Protocol#Type:VarInt
+        let cases: [Int32: Data] = [
+            0:           .init([0x00]),
+            1:           .init([0x01]),
+            2:           .init([0x02]),
+            127:         .init([0x7f]),
+            128:         .init([0x80, 0x01]),
+            255:         .init([0xff, 0x01]),
+            25565:       .init([0xdd, 0xc7, 0x01]),
+            2097151:     .init([0xff, 0xff, 0x7f]),
+            2147483647:  .init([0xff, 0xff, 0xff, 0xff, 0x07]),
+            -1:          .init([0xff, 0xff, 0xff, 0xff, 0x0f]),
+            -2147483648: .init([0x80, 0x80, 0x80, 0x80, 0x08])
+        ]
+        
+        for testCase in cases {
+            XCTAssertEqual(testCase.key.varInt, testCase.value)
         }
     }
-
 }
