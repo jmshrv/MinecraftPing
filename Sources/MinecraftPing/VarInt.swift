@@ -10,6 +10,11 @@ import Foundation
 fileprivate let SEGMENT_BITS: UInt32 = 0x7F
 fileprivate let CONTINUE_BIT: UInt32 = 0x80
 
+enum VarIntError: Error {
+    case unexpectedEnd
+    case varIntTooBig
+}
+
 extension Int32 {
     var varInt: Data {
         var value = UInt32(bitPattern: self)
@@ -25,5 +30,31 @@ extension Int32 {
             
             value >>= 7
         }
+    }
+    
+    init(varInt: Data) throws {
+        var varIntCopy = varInt
+        var value: UInt32 = 0
+        var position: UInt32 = 0
+        
+        while true {
+            guard let currentByte = varIntCopy.popFirst() else {
+                throw VarIntError.unexpectedEnd
+            }
+            
+            value |= (UInt32(currentByte) & SEGMENT_BITS) << position
+            
+            if UInt32(currentByte) & CONTINUE_BIT == 0 {
+                break
+            }
+            
+            position += 7
+            
+            if position >= 32 {
+                throw VarIntError.varIntTooBig
+            }
+        }
+        
+        self.init(bitPattern: value)
     }
 }
