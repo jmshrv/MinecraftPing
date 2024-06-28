@@ -142,7 +142,8 @@ public struct MinecraftStatus: Codable, Equatable {
     public let previewsChat: Bool?
 }
 
-/// A connection to a Minecraft server
+/// A connection to a Minecraft server. When initialised, the socket is created. Don't leave this object hanging around
+/// for ages.
 public struct MinecraftConnection {
     let connection: URLSessionStreamTask
     
@@ -157,6 +158,11 @@ public struct MinecraftConnection {
         connection.resume()
     }
     
+    
+    /// Performs a [Server List Ping](https://wiki.vg/Server_List_Ping) with the server, returning the server status.
+    /// Note that the socket connection will stay active after this call.
+    /// - Returns: A `MinecraftStatus`
+    /// - Throws: Errors related to `URLSessionStreamTask`, and any encoding errors
     public func ping() async throws -> MinecraftStatus {
         let handshake = MinecraftPacket(data: MinecraftHandshake(serverAddress: hostname, serverPort: port))
         try await connection.write(handshake.minecraftEncoded, timeout: .zero)
