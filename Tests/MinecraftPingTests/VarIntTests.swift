@@ -32,8 +32,11 @@ final class VarIntTests: XCTestCase {
     
     func testFromVarInt() throws {
         for testCase in cases {
-            let output = try Int32(varInt: testCase.value)
+            var testCaseValueCopy = testCase.value
+            
+            let output = try Int32(varInt: &testCaseValueCopy)
             XCTAssertEqual(output, testCase.key)
+            XCTAssert(testCaseValueCopy.isEmpty)
         }
     }
 }

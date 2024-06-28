@@ -32,13 +32,12 @@ extension Int32 {
         }
     }
     
-    init(varInt: Data) throws {
-        var varIntCopy = varInt
+    init(varInt: inout Data) throws {
         var value: UInt32 = 0
         var position: UInt32 = 0
         
         while true {
-            guard let currentByte = varIntCopy.popFirst() else {
+            guard let currentByte = varInt.popFirst() else {
                 throw VarIntError.unexpectedEnd
             }
             
