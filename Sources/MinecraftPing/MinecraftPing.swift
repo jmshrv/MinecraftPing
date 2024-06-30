@@ -107,7 +107,7 @@ struct MinecraftStatusResponse: MinecraftDecodable {
     }
 }
 
-public struct MinecraftVersion: Codable, Equatable {
+public struct MinecraftVersion: Decodable, Equatable {
     public let name: String
     public let protocolVersion: Int
     
@@ -117,22 +117,45 @@ public struct MinecraftVersion: Codable, Equatable {
     }
 }
 
-public struct MinecraftDescription: Codable, Equatable {
+public struct MinecraftDescriptionDictionary: Decodable, Equatable {
     public let text: String
 }
 
-public struct MinecraftPlayerSample: Codable, Equatable, Identifiable {
+public enum MinecraftDescription: Decodable, Equatable {
+    case text(String)
+    case dictionary(MinecraftDescriptionDictionary)
+    
+    var actualText: String {
+        return switch self {
+        case .text(let text): text
+        case .dictionary(let dictionary): dictionary.text
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let text = try? container.decode(String.self) {
+            self = .text(text)
+        } else if let dictionary = try? container.decode(MinecraftDescriptionDictionary.self) {
+            self = .dictionary(dictionary)
+        } else {
+            throw DecodingError.typeMismatch(MinecraftDescription.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid description type"))
+        }
+    }
+}
+
+public struct MinecraftPlayerSample: Decodable, Equatable, Identifiable {
     public let name: String
     public let id: UUID
 }
 
-public struct MinecraftPlayers: Codable, Equatable {
+public struct MinecraftPlayers: Decodable, Equatable {
     public let max: Int
     public let online: Int
     public let sample: [MinecraftPlayerSample]?
 }
 
-public struct MinecraftStatus: Codable, Equatable {
+public struct MinecraftStatus: Decodable, Equatable {
     public let version: MinecraftVersion
     public let players: MinecraftPlayers?
     public let description: MinecraftDescription?
@@ -145,17 +168,12 @@ public struct MinecraftStatus: Codable, Equatable {
 /// A connection to a Minecraft server. When initialised, the socket is created. Don't leave this object hanging around
 /// for ages.
 public struct MinecraftConnection {
-    let connection: URLSessionStreamTask
-    
     let hostname: String
     let port: UInt16
     
     public init(hostname: String, port: UInt16) {
         self.hostname = hostname
         self.port = port
-        
-        connection = URLSession.shared.streamTask(withHostName: hostname, port: Int(port))
-        connection.resume()
     }
     
     
@@ -164,16 +182,35 @@ public struct MinecraftConnection {
     /// - Returns: A `MinecraftStatus`
     /// - Throws: Errors related to `URLSessionStreamTask`, and any encoding errors
     public func ping() async throws -> MinecraftStatus {
+        let connection = URLSession.shared.streamTask(withHostName: hostname, port: Int(port))
+        connection.resume()
+        
         let handshake = MinecraftPacket(data: MinecraftHandshake(serverAddress: hostname, serverPort: port))
         try await connection.write(handshake.minecraftEncoded, timeout: .zero)
         
         let statusRequest = MinecraftPacket(data: MinecraftStatusRequest())
         try await connection.write(statusRequest.minecraftEncoded, timeout: .zero)
         
-        let (response, _) = try await connection.readData(ofMinLength: 0, maxLength: .max, timeout: .zero)
+        var response = Data()
+        var responseSize: Int32? = nil
+        var lengthLength = 0
         
-        guard let response else {
-            throw MinecraftConnectionError.noData
+        while response.count - lengthLength != (responseSize ?? .max) {
+            let (newResponse, _) = try await connection.readData(ofMinLength: 0, maxLength: .max, timeout: .zero)
+            
+            guard let newResponse else {
+                throw MinecraftConnectionError.noData
+            }
+            
+            response.append(newResponse)
+            
+            if responseSize == nil {
+                do {
+                    var responseClone = response
+                    responseSize = try .init(varInt: &responseClone)
+                    lengthLength = response.count - responseClone.count
+                } catch {}
+            }
         }
         
         let decodedResponse = try MinecraftStatusResponse(fromMinecraft: response)

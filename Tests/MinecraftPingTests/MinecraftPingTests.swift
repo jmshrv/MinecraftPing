@@ -12,7 +12,7 @@ final class MinecraftPingTests: XCTestCase {
 //            previewsChat: nil
 //        )
         
-        let connection = MinecraftConnection(hostname: "144.21.55.208", port: 25565)
+        let connection = MinecraftConnection(hostname: "localhost", port: 25565)
         
         let result = try await connection.ping()
         print(result)
