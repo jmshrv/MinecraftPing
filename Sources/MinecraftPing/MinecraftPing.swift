@@ -134,7 +134,7 @@ public enum MinecraftDescription: Decodable, Equatable {
     case text(String)
     case dictionary(MinecraftDescriptionDictionary)
     
-    var actualText: String {
+    public var actualText: String {
         return switch self {
         case .text(let text): text
         case .dictionary(let dictionary): dictionary.text
