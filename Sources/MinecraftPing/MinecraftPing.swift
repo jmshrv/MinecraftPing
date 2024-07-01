@@ -116,9 +116,17 @@ struct MinecraftStatusResponse: MinecraftDecodable {
     }
 }
 
-public struct MinecraftVersion: Decodable, Equatable {
+#if canImport(SwiftUI)
+@Observable
+#endif
+public class MinecraftVersion: Decodable {
     public let name: String
     public let protocolVersion: Int
+    
+    public init(name: String, protocolVersion: Int) {
+        self.name = name
+        self.protocolVersion = protocolVersion
+    }
     
     enum CodingKeys: String, CodingKey {
         case name
@@ -126,11 +134,18 @@ public struct MinecraftVersion: Decodable, Equatable {
     }
 }
 
-public struct MinecraftDescriptionDictionary: Decodable, Equatable {
+#if canImport(SwiftUI)
+@Observable
+#endif
+public class MinecraftDescriptionDictionary: Decodable {
     public let text: String
+    
+    public init(text: String) {
+        self.text = text
+    }
 }
 
-public enum MinecraftDescription: Decodable, Equatable {
+public enum MinecraftDescription: Decodable {
     case text(String)
     case dictionary(MinecraftDescriptionDictionary)
     
@@ -153,18 +168,38 @@ public enum MinecraftDescription: Decodable, Equatable {
     }
 }
 
-public struct MinecraftPlayerSample: Decodable, Equatable, Identifiable {
+#if canImport(SwiftUI)
+@Observable
+#endif
+public class MinecraftPlayerSample: Decodable, Identifiable {
     public let name: String
     public let id: UUID
+    
+    public init(name: String, id: UUID) {
+        self.name = name
+        self.id = id
+    }
 }
 
-public struct MinecraftPlayers: Decodable, Equatable {
+#if canImport(SwiftUI)
+@Observable
+#endif
+public class MinecraftPlayers: Decodable {
     public let max: Int
     public let online: Int
     public let sample: [MinecraftPlayerSample]?
+    
+    public init(max: Int, online: Int, sample: [MinecraftPlayerSample]?) {
+        self.max = max
+        self.online = online
+        self.sample = sample
+    }
 }
 
-public struct MinecraftStatus: Decodable, Equatable {
+#if canImport(SwiftUI)
+@Observable
+#endif
+public class MinecraftStatus: Decodable {
     public let version: MinecraftVersion
     public let players: MinecraftPlayers?
     public let description: MinecraftDescription?
@@ -172,6 +207,15 @@ public struct MinecraftStatus: Decodable, Equatable {
     public var favicon: String?
     public let enforcesSecureChat: Bool?
     public let previewsChat: Bool?
+    
+    public required init(version: MinecraftVersion, players: MinecraftPlayers?, description: MinecraftDescription?, favicon: String? = nil, enforcesSecureChat: Bool?, previewsChat: Bool?) {
+        self.version = version
+        self.players = players
+        self.description = description
+        self.favicon = favicon
+        self.enforcesSecureChat = enforcesSecureChat
+        self.previewsChat = previewsChat
+    }
     
     public static var mock: Self {
         .init(
