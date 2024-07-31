@@ -14,7 +14,14 @@ final class MinecraftPingTests: XCTestCase {
         
         let connection = MinecraftConnection(hostname: "localhost", port: 25565)
         
-        let result = try await connection.ping()
-        print(result)
+        try await connection.ping()
+    }
+    
+    func testSkin() async throws {
+        let testPlayer = MinecraftPlayerSample(name: "UnicornsOnLSD", id: .init(uuidString: "ff01fa15-7b46-4368-a193-75892222201e")!)
+        
+        let result = try await testPlayer.skin()
+        
+        XCTAssertNotNil(result)
     }
 }

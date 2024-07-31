@@ -179,6 +179,26 @@ public class MinecraftPlayerSample: Decodable, Identifiable {
         self.name = name
         self.id = id
     }
+    
+    public func skin() async throws -> Data? {
+        let url = URL(string: "https://sessionserver.mojang.com/session/minecraft/profile/\(id)")!
+        
+        let (profileData, _) = try await URLSession.shared.data(from: url)
+        
+        let profile = try JSONDecoder().decode(MinecraftProfile.self, from: profileData)
+        
+        guard let texture = try profile.properties.first?.texture() else {
+            return nil
+        }
+        
+        guard let skin = texture.textures.skin else {
+            return nil
+        }
+        
+        let (skinData, _) = try await URLSession.shared.data(from: skin.url)
+        
+        return skinData
+    }
 }
 
 #if canImport(SwiftUI)
