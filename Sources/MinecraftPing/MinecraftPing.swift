@@ -214,6 +214,29 @@ public class MinecraftPlayers: Decodable {
         self.online = online
         self.sample = sample
     }
+    
+    public func skins() async throws -> [(MinecraftPlayerSample, Data?)]? {
+        guard let sample else {
+            return nil
+        }
+        
+        return try await withThrowingTaskGroup(of: (MinecraftPlayerSample, Data?).self) { group -> [(MinecraftPlayerSample, Data?)] in
+            for player in sample {
+                group.addTask {
+                    let skin = try await player.skin()
+                    return (player, skin)
+                }
+            }
+            
+            var collected: [(MinecraftPlayerSample, Data?)] = []
+            
+            for try await result in group {
+                collected.append(result)
+            }
+            
+            return collected
+        }
+    }
 }
 
 #if canImport(SwiftUI)
