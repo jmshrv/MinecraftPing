@@ -234,7 +234,7 @@ public class MinecraftPlayers: Decodable {
                 collected.append(result)
             }
             
-            return collected
+            return collected.sorted(by: { $0.0.name.localizedStandardCompare($1.0.name) == .orderedAscending } )
         }
     }
 }
