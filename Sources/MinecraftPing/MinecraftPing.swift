@@ -119,7 +119,7 @@ struct MinecraftStatusResponse: MinecraftDecodable {
 #if canImport(SwiftUI)
 @Observable
 #endif
-public class MinecraftVersion: Decodable {
+public final class MinecraftVersion: Decodable, Sendable {
     public let name: String
     public let protocolVersion: Int
     
@@ -137,7 +137,7 @@ public class MinecraftVersion: Decodable {
 #if canImport(SwiftUI)
 @Observable
 #endif
-public class MinecraftDescriptionDictionary: Decodable {
+public final class MinecraftDescriptionDictionary: Decodable, Sendable {
     public let text: String
     
     public init(text: String) {
@@ -145,7 +145,7 @@ public class MinecraftDescriptionDictionary: Decodable {
     }
 }
 
-public enum MinecraftDescription: Decodable {
+public enum MinecraftDescription: Decodable, Sendable {
     case text(String)
     case dictionary(MinecraftDescriptionDictionary)
     
@@ -171,7 +171,7 @@ public enum MinecraftDescription: Decodable {
 #if canImport(SwiftUI)
 @Observable
 #endif
-public class MinecraftPlayerSample: Decodable, Identifiable {
+public final class MinecraftPlayerSample: Decodable, Identifiable, Sendable {
     public let name: String
     public let id: UUID
     
@@ -204,7 +204,7 @@ public class MinecraftPlayerSample: Decodable, Identifiable {
 #if canImport(SwiftUI)
 @Observable
 #endif
-public class MinecraftPlayers: Decodable {
+public final class MinecraftPlayers: Decodable, Sendable {
     public let max: Int
     public let online: Int
     public let sample: [MinecraftPlayerSample]?
@@ -240,7 +240,7 @@ public class MinecraftPlayers: Decodable {
 }
 
 /// The "world" field in https://github.com/Nyuhnyash/VSStatusServer
-public struct VintageStoryWorld: Decodable {
+public struct VintageStoryWorld: Decodable, Sendable {
     /// A human-readable date time for the server's world. For example, "2. May, Year 0, 17:31"
     public let datetime: String
 }
@@ -248,12 +248,12 @@ public struct VintageStoryWorld: Decodable {
 #if canImport(SwiftUI)
 @Observable
 #endif
-public class MinecraftStatus: Decodable {
+public final class MinecraftStatus: Decodable, Sendable {
     public let version: MinecraftVersion
     public let players: MinecraftPlayers?
     public let description: MinecraftDescription?
     
-    public var favicon: String?
+    public let favicon: String?
     public let enforcesSecureChat: Bool?
     public let previewsChat: Bool?
     

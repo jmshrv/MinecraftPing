@@ -25,5 +25,6 @@ let package = Package(
         .testTarget(
             name: "MinecraftPingTests",
             dependencies: ["MinecraftPing"]),
-    ]
+    ],
+    swiftLanguageModes: [.v6]
 )
