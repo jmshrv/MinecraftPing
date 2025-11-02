@@ -239,6 +239,12 @@ public class MinecraftPlayers: Decodable {
     }
 }
 
+/// The "world" field in https://github.com/Nyuhnyash/VSStatusServer
+public struct VintageStoryWorld: Decodable {
+    /// A human-readable date time for the server's world. For example, "2. May, Year 0, 17:31"
+    public let datetime: String
+}
+
 #if canImport(SwiftUI)
 @Observable
 #endif
@@ -251,13 +257,25 @@ public class MinecraftStatus: Decodable {
     public let enforcesSecureChat: Bool?
     public let previewsChat: Bool?
     
-    public required init(version: MinecraftVersion, players: MinecraftPlayers?, description: MinecraftDescription?, favicon: String? = nil, enforcesSecureChat: Bool?, previewsChat: Bool?) {
+    /// The "world" field for Vintage Story servers with `VSStatusServer`.
+    public let world: VintageStoryWorld?
+    
+    public required init(
+        version: MinecraftVersion,
+        players: MinecraftPlayers?,
+        description: MinecraftDescription?,
+        favicon: String? = nil,
+        enforcesSecureChat: Bool?,
+        previewsChat: Bool?,
+        world: VintageStoryWorld?
+    ) {
         self.version = version
         self.players = players
         self.description = description
         self.favicon = favicon
         self.enforcesSecureChat = enforcesSecureChat
         self.previewsChat = previewsChat
+        self.world = world
     }
     
     public static var mock: Self {
@@ -271,7 +289,8 @@ public class MinecraftStatus: Decodable {
             description: .text("A Minecraft Server"),
             favicon: nil,
             enforcesSecureChat: true,
-            previewsChat: false
+            previewsChat: false,
+            world: nil
         )
     }
     
