@@ -120,6 +120,11 @@ public struct MinecraftVersion: Decodable, Sendable {
     public let name: String
     public let protocolVersion: Int
     
+    public init(name: String, protocolVersion: Int) {
+        self.name = name
+        self.protocolVersion = protocolVersion
+    }
+    
     enum CodingKeys: String, CodingKey {
         case name
         case protocolVersion = "protocol"
@@ -128,6 +133,10 @@ public struct MinecraftVersion: Decodable, Sendable {
 
 public struct MinecraftDescriptionDictionary: Decodable, Sendable {
     public let text: String
+    
+    public init(text: String) {
+        self.text = text
+    }
 }
 
 public enum MinecraftDescription: Decodable, Sendable {
@@ -157,6 +166,11 @@ public struct MinecraftPlayerSample: Decodable, Identifiable, Sendable {
     public let name: String
     public let id: UUID
     
+    public init(name: String, id: UUID) {
+        self.name = name
+        self.id = id
+    }
+    
     public func skin() async throws -> Data? {
         let url = URL(string: "https://sessionserver.mojang.com/session/minecraft/profile/\(id)")!
         
@@ -182,6 +196,12 @@ public struct MinecraftPlayers: Decodable, Sendable {
     public let max: Int
     public let online: Int
     public let sample: [MinecraftPlayerSample]?
+    
+    public init(max: Int, online: Int, sample: [MinecraftPlayerSample]?) {
+        self.max = max
+        self.online = online
+        self.sample = sample
+    }
     
     public func skins() async throws -> [(MinecraftPlayerSample, Data?)]? {
         guard let sample else {
@@ -211,6 +231,10 @@ public struct MinecraftPlayers: Decodable, Sendable {
 public struct VintageStoryWorld: Decodable, Sendable {
     /// A human-readable date time for the server's world. For example, "2. May, Year 0, 17:31"
     public let datetime: String
+    
+    public init(datetime: String) {
+        self.datetime = datetime
+    }
 }
 
 public struct MinecraftStatus: Decodable, Sendable {
@@ -224,6 +248,24 @@ public struct MinecraftStatus: Decodable, Sendable {
     
     /// The "world" field for Vintage Story servers with `VSStatusServer`.
     public let world: VintageStoryWorld?
+    
+    public init(
+        version: MinecraftVersion,
+        players: MinecraftPlayers?,
+        description: MinecraftDescription?,
+        favicon: String?,
+        enforcesSecureChat: Bool?,
+        previewsChat: Bool?,
+        world: VintageStoryWorld?
+    ) {
+        self.version = version
+        self.players = players
+        self.description = description
+        self.favicon = favicon
+        self.enforcesSecureChat = enforcesSecureChat
+        self.previewsChat = previewsChat
+        self.world = world
+    }
     
     public static var mock: Self {
         .init(
